@@ -1,10 +1,12 @@
+# please fix this code such that the amount of data stored from an API into the database each time i execute the file is 25 or fewer items. what this means is that my database insertion statements should be such that i only add 25 rows of data into each table every time i execute my program. The purpose behind this is to never flood a database with insert requests, as when working with data in the real world, this could cause disruptions within a service or company.
+
 import sqlite3
 import requests
 from datetime import datetime, timedelta
 from pprint import pprint
 
 # Connect to SQLite database
-conn = sqlite3.connect('jobs_database.db')
+conn = sqlite3.connect('muse_jobs.db')
 cursor = conn.cursor()
 
 # Create a table for job postings if it doesn't exist
