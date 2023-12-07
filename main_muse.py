@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from pprint import pprint
 
 # Connect to SQLite database
-conn = sqlite3.connect('jobs_database.db')
+conn = sqlite3.connect('muse_jobs.db')
 cursor = conn.cursor()
 
 # Create a table for job postings if it doesn't exist
