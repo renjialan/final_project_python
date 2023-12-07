@@ -16,7 +16,7 @@ cursor.execute('''
     )
 ''')
 
-def linkedin_scraper(webpage, page_number):
+def linkedin_scraper(webpage, page_number, rows_to_fetch=25):
     next_page = webpage + str(page_number)
     print(str(next_page))
     response = requests.get(str(next_page))
@@ -38,12 +38,13 @@ def linkedin_scraper(webpage, page_number):
         print('Data updated')
 
     if page_number < 25:
-        page_number = page_number + 25
-        linkedin_scraper(webpage, page_number)
+        page_number += rows_to_fetch  # Adjust as needed based on your pagination
+        linkedin_scraper(webpage, page_number, rows_to_fetch)
     else:
         # Commit changes and close the database connection
         conn.commit()
         conn.close()
         print('Database connection closed')
 
+# Start the scraping with an initial page_number of 0
 linkedin_scraper('https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Technology&location=United%20States&geoId=103644278&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0&start=', 0)
