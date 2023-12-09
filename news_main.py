@@ -1,4 +1,4 @@
-from db_manager import (
+from news_db_manager import (
     create_connection, 
     insert_post, 
     create_sources_table, 
