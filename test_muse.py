@@ -1,8 +1,6 @@
-# adjust this code so it fetches the category, experience level, listing, and publication date from the first ten pages of https://www.themuse.com/search/ and puts at least 100 data values into a sqlite database:
-
 import sqlite3
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 from pprint import pprint
 
 # Connect to SQLite database
@@ -27,7 +25,7 @@ full_data = []
 unique_job_listings = set()
 page_count = 0
 
-while len(full_data) < 100 and page_count < 25:
+while len(full_data) < 100:
     page_count += 1
     res = requests.get(f'https://www.themuse.com/api/public/jobs?page={page_count}')
     data = res.json()
@@ -43,10 +41,10 @@ while len(full_data) < 100 and page_count < 25:
 
             # Check if the job listing is not already in the set
             if job_listing not in unique_job_listings:
-                job_category = item.get('category', 'N/A')
-                experience_level = item.get('level', 'N/A')
+                job_category = item.get('categories', [{'name': 'N/A'}])[0]['name']
+                experience_level = item.get('levels', [{'name': 'N/A'}])[0]['name']
 
-                # Store data in SQLite database
+                # Store data in SQLite database using parameterized query
                 cursor.execute('''
                     INSERT INTO job_postings (job_category, job_listing, publication_date, experience_level)
                     VALUES (?, ?, ?, ?)
@@ -63,6 +61,10 @@ while len(full_data) < 100 and page_count < 25:
 
                 # Add job listing to the set to track uniqueness
                 unique_job_listings.add(job_listing)
+
+                # Check if we have reached the limit of 100 data points
+                if len(full_data) >= 100:
+                    break
 
 # Print the collected data
 pprint(full_data)
