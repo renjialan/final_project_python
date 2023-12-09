@@ -1,16 +1,10 @@
-# adjust this code so it fetches the category, experience level, listing, and publication date from the first ten pages of https://www.themuse.com/search/ and puts at least 100 data values into a sqlite database:
-
-# please adjust this code so that it limits how much data is stored from an API into the database each time i execute the file that stores data to the database to 25 or fewer rows at a time. The data must be stored in a SQLite database. This means that you must run the file that stores the data multiple times to gather at least 100 items total without duplicating any data or changing the source code. It means that my database insertion statements should be such that i only add 25 rows of data into each table every time i execute my program. The purpose behind this is to never flood a database with insert requests, as when working with data in the real world, this could cause disruptions within a service or company.
 import sqlite3
 import requests
-from datetime import datetime, timedelta
-from pprint import pprint
-
+from datetime import datetime
 
 # Connect to SQLite database
 conn = sqlite3.connect('muse_jobs.db')
 cursor = conn.cursor()
-
 
 # Create a table for job postings if it doesn't exist
 cursor.execute('''
@@ -23,64 +17,62 @@ cursor.execute('''
    )
 ''')
 
+# Create a table to track the last processed page
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS last_processed_page (
+        id INTEGER PRIMARY KEY,
+        page_number INTEGER
+    )
+''')
 
-# Commit changes to the database
-conn.commit()
+# Function to get the last processed page
+def get_last_processed_page(cursor):
+    cursor.execute("SELECT page_number FROM last_processed_page WHERE id = 1")
+    result = cursor.fetchone()
+    return result[0] if result else 0
 
+# Function to update the last processed page
+def update_last_processed_page(cursor, page_number):
+    cursor.execute("INSERT OR REPLACE INTO last_processed_page (id, page_number) VALUES (1, ?)", (page_number,))
 
-full_data = []
+# Initialize a set to track unique job listings
 unique_job_listings = set()
-page_count = 0
 
+# Fetch the last processed page
+last_processed_page = get_last_processed_page(cursor)
+max_pages = 10  # Max pages to scrape
+rows_to_fetch = 25  # Number of rows to insert per run
+page_count = last_processed_page + 1  # Start from the next page
 
-while len(full_data) < 100 and page_count < 25:
-   page_count += 1
-   res = requests.get(f'https://www.themuse.com/api/public/jobs?page={page_count}')
-   data = res.json()
+# Fetch and insert data
+while page_count <= max_pages and len(unique_job_listings) < rows_to_fetch:
+    res = requests.get(f'https://www.themuse.com/api/public/jobs?page={page_count}')
+    data = res.json()
 
+    lists = data['results']
+    for item in lists:
+        publication_date = datetime.strptime(item['publication_date'], '%Y-%m-%dT%H:%M:%SZ')
+        job_listing = item.get('name', 'N/A')
 
-   lists = data['results']
-   for item in lists:
-       # Convert the publication date to a datetime object
-       publication_date = datetime.strptime(item['publication_date'], '%Y-%m-%dT%H:%M:%SZ')
+        if job_listing not in unique_job_listings:
+            job_category = item.get('category', 'N/A')
+            experience_level = item.get('level', 'N/A')
 
+            cursor.execute('''
+                INSERT INTO job_postings (job_category, job_listing, publication_date, experience_level)
+                VALUES (?, ?, ?, ?)
+            ''', (job_category, job_listing, publication_date.strftime('%Y-%m-%dT%H:%M:%SZ'), experience_level))
+            unique_job_listings.add(job_listing)
 
-       # Check if the publication date is after '2023-05-19T23:38:55Z'
-       if publication_date > datetime.strptime('2023-05-19T23:38:55Z', '%Y-%m-%dT%H:%M:%SZ'):
-           job_listing = item.get('name', 'N/A')
+            if len(unique_job_listings) >= rows_to_fetch:
+                break
 
+    if len(unique_job_listings) >= rows_to_fetch:
+        break
 
-           # Check if the job listing is not already in the set
-           if job_listing not in unique_job_listings:
-               job_category = item.get('category', 'N/A')
-               experience_level = item.get('level', 'N/A')
+    page_count += 1
 
-
-               # Store data in SQLite database
-               cursor.execute('''
-                   INSERT INTO job_postings (job_category, job_listing, publication_date, experience_level)
-                   VALUES (?, ?, ?, ?)
-               ''', (job_category, job_listing, publication_date.strftime('%Y-%m-%dT%H:%M:%SZ'), experience_level))
-               conn.commit()
-
-
-               # Append data to the full_data list (optional)
-               full_data.append({
-                   'job_category': job_category,
-                   'job_listing': job_listing,
-                   'publication_date': publication_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                   'experience_level': experience_level
-               })
-
-
-               # Add job listing to the set to track uniqueness
-               unique_job_listings.add(job_listing)
-
-
-# Print the collected data
-pprint(full_data)
-
-
-
-
-
+# Update the last processed page
+update_last_processed_page(cursor, page_count)
+conn.commit()
+conn.close()
