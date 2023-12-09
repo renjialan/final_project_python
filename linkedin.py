@@ -29,13 +29,14 @@ def linkedin_scraper(webpage, page_number, conn, cursor, max_pages, rows_to_fetc
             location = job.find('span', class_='job-search-card__location').text.strip()
             link = job.find('a', class_='base-card__full-link')['href']
 
+            title_id = get_or_insert(cursor, 'titles', 'name', title)
             company_id = get_or_insert(cursor, 'companies', 'name', company)
             location_id = get_or_insert(cursor, 'locations', 'name', location)
 
             cursor.execute('''
-                INSERT INTO jobs (title, company_id, location_id, apply_link)
+                INSERT INTO jobs (title_id, company_id, location_id, apply_link)
                 VALUES (?, ?, ?, ?)
-            ''', (title, company_id, location_id, link))
+            ''', (title_id, company_id, location_id, link))
 
         conn.commit()  # Commit after processing each page
         linkedin_scraper(webpage, page_number + 1, conn, cursor, max_pages, rows_to_fetch)
@@ -45,6 +46,14 @@ def linkedin_scraper(webpage, page_number, conn, cursor, max_pages, rows_to_fetc
 def main():
     conn = sqlite3.connect('linkedin-jobs.db')
     cursor = conn.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS titles (
+        id INTEGER PRIMARY KEY,
+        name TEXT UNIQUE
+    )
+''')
+
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS companies (
@@ -59,16 +68,18 @@ def main():
         )
     ''')
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS jobs (
-            job_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            company_id INTEGER,
-            location_id INTEGER,
-            apply_link TEXT,
-            FOREIGN KEY (company_id) REFERENCES companies (id),
-            FOREIGN KEY (location_id) REFERENCES locations (id)
-        )
-    ''')
+    CREATE TABLE IF NOT EXISTS jobs (
+        job_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title_id INTEGER,
+        company_id INTEGER,
+        location_id INTEGER,
+        apply_link TEXT,
+        FOREIGN KEY (title_id) REFERENCES titles (id),
+        FOREIGN KEY (company_id) REFERENCES companies (id),
+        FOREIGN KEY (location_id) REFERENCES locations (id)
+    )
+''')
+
     conn.commit()
 
     max_pages = 5
