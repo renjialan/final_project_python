@@ -1,6 +1,6 @@
 # adjust this code so it fetches the category, experience level, listing, and publication date from the first ten pages of https://www.themuse.com/search/ and puts at least 100 data values into a sqlite database:
 
-
+# please adjust this code so that it limits how much data is stored from an API into the database each time i execute the file that stores data to the database to 25 or fewer rows at a time. The data must be stored in a SQLite database. This means that you must run the file that stores the data multiple times to gather at least 100 items total without duplicating any data or changing the source code. It means that my database insertion statements should be such that i only add 25 rows of data into each table every time i execute my program. The purpose behind this is to never flood a database with insert requests, as when working with data in the real world, this could cause disruptions within a service or company.
 import sqlite3
 import requests
 from datetime import datetime, timedelta
