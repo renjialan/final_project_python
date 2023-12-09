@@ -1,3 +1,5 @@
+# adjust this code so it fetches the category, experience level, listing, and publication date from the first ten pages of https://www.themuse.com/search/ and puts at least 100 data values into a sqlite database:
+
 import sqlite3
 import requests
 from datetime import datetime, timedelta
