@@ -90,9 +90,13 @@ insert_data_into_unified_db('unified_database.db', muse_data, '''
 ''')
 
 # Fetch and insert data from the LinkedIn jobs database
-linkedin_data = fetch_data_from_db('linkedin-jobs.db', 'SELECT title, company, location, apply_link FROM jobs')
+linkedin_data = fetch_data_from_db('linkedin-jobs.db', '''
+    SELECT j.title, c.name, l.name, j.apply_link 
+    FROM jobs j
+    INNER JOIN companies c ON j.company_id = c.id
+    INNER JOIN locations l ON j.location_id = l.id
+''')
 insert_data_into_unified_db('unified_database.db', linkedin_data, '''
     INSERT INTO linkedin_jobs (title, company, location, apply_link) VALUES (?, ?, ?, ?)
 ''')
-
 
