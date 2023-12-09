@@ -11,7 +11,7 @@ def count_words(content, words):
     return sum(content.lower().count(word.lower()) for word in words)
 
 def main():
-    database_path = 'database.db'
+    database_path = 'news_database.db'
     conn = create_connection(database_path)
 
     if conn is not None:

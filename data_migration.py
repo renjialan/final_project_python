@@ -71,12 +71,12 @@ create_table_in_unified_db('unified_database.db', '''
 ''')
 
 # Fetch and insert data from the first News API table
-news_posts_data = fetch_data_from_db('database.db', 'SELECT source_id, content, timestamp, neutral_count, positive_count, negative_count FROM posts')
+news_posts_data = fetch_data_from_db('news_database.db', 'SELECT source_id, content, timestamp, neutral_count, positive_count, negative_count FROM posts')
 insert_data_into_unified_db('unified_database.db', news_posts_data, '''
     INSERT INTO news_posts (source_id, content, timestamp, neutral_count, positive_count, negative_count) VALUES (?, ?, ?, ?, ?, ?)
 ''')
 # Fetch and insert data from the second News API table
-news_sources_data = fetch_data_from_db('database.db', 'SELECT source_id, name FROM sources')
+news_sources_data = fetch_data_from_db('news_database.db', 'SELECT source_id, name FROM sources')
 insert_data_into_unified_db('unified_database.db', news_sources_data, '''
     INSERT INTO news_sources (source_id, name) VALUES (?, ?)
 ''')
