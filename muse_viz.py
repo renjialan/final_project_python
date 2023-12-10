@@ -28,9 +28,35 @@ plt.xlabel('Day of the Week', fontsize=14)
 plt.ylabel('Number of Job Listings', fontsize=14)
 plt.title('Job Listings Posted by Day of the Week', fontsize=16)
 plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 
 # Display the bar chart
+plt.show()
+
+# Extract months from publication dates
+months = [datetime.strptime(date[0], '%B %d, %Y').strftime('%B') for date in results]
+
+# Count occurrences of each month
+month_counts = Counter(months)
+
+# Order months
+ordered_months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+]
+
+# Create a bar graph
+plt.figure(figsize=(10, 6))
+plt.bar(ordered_months, [month_counts[month] for month in ordered_months], color='salmon', edgecolor='black', linewidth=1.2)
+plt.xlabel('Month', fontsize=14)
+plt.ylabel('Number of Job Listings', fontsize=14)
+plt.title('Job Listings Posted by Month', fontsize=16)
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+
+# Display the bar graph
 plt.show()
 
 # Close the database connection
