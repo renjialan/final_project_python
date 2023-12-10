@@ -19,9 +19,18 @@ def main():
         create_posts_table(conn)
 
     search_queries = ['technology innovations', 'job market trends', 'economic recession', 'company hiring trends']
-    neutral_words = ['technology', 'innovation']
-    negative_words = ['recession', 'unemployment']
-    positive_words = ['hiring', 'growth']
+    neutral_words = ['technology', 'innovation' , 'job market', 'economy', 'recession', 'hiring']
+    negative_words = [ 'recession', 
+    'unemployment', 
+    'layoffs', 
+    'firing', 
+    'decline', 
+    'downsizing', 
+    'crisis', 
+    'loss', 
+    'decrease', 'downturn']
+    positive_words = ['hiring', 'growth', 'expansion', 'innovation','increase', 
+    'rise']
 
     articles_processed = 0
     max_articles_to_insert = 25  # Maximum number of articles to insert per execution
