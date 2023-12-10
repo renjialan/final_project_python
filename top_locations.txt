@@ -1,0 +1,5 @@
+United States: 13
+New York, NY: 5
+Austin, TX: 4
+Dallas, TX: 3
+Los Angeles, CA: 3
