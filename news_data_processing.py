@@ -44,5 +44,5 @@ def main():
 
     print("Averages and total counts per day have been written to their respective files.")
 
-if __name__ == '__main__':
+
     main()

@@ -47,5 +47,5 @@ def main():
     locations_data = read_from_txt(filename='top_locations.txt')
     plot_top_locations(locations_data)
 
-if __name__ == '__main__':
+
     main()

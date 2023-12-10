@@ -47,5 +47,5 @@ def main():
     # Plotting total sentiment data
     plot_total_sentiment_data(total_data)
 
-if __name__ == '__main__':
+
     main()

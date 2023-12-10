@@ -7,6 +7,7 @@ from news_db_manager import (
 )
 from news_api_client import fetch_news
 
+
 def count_words(content, words):
     return sum(content.lower().count(word.lower()) for word in words)
 
@@ -56,5 +57,5 @@ def main():
 
     conn.close()
 
-if __name__ == '__main__':
+
     main()
