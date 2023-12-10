@@ -1,72 +1,65 @@
+# CODE FOR CALCULATIONS FROM MUSE DB ALONE, NOT FULL DB YET
+# import sqlite3
+# from collections import Counter
+# from datetime import datetime
+
+# # Connect to SQLite database
+# conn = sqlite3.connect('muse_jobs.db')
+# cursor = conn.cursor()
+
+# # Fetch all job postings from the database
+# cursor.execute("SELECT publication_date FROM job_postings")
+# results = cursor.fetchall()
+
+# # Extract months and days from publication dates
+# months = [datetime.strptime(date[0], '%B %d, %Y').strftime('%B') for date in results]
+# days = [datetime.strptime(date[0], '%B %d, %Y').strftime('%A') for date in results]
+
+# # Calculate the most common month and day
+# most_common_month = Counter(months).most_common(1)[0][0]
+# most_common_day = Counter(days).most_common(1)[0][0]
+
+# # Print the results
+# print(f"The most common month for job postings is: {most_common_month}")
+# print(f"The most common day of the week for job postings is: {most_common_day}")
+
+# # Close the database connection
+# conn.close()
+
+# CODE FOR VISUALIZATIONS FROM MUSE DB ALONE, NOT FULL DB YET
 import sqlite3
-import requests
-from datetime import datetime, timedelta
-from pprint import pprint
+from collections import Counter
+from datetime import datetime
+import matplotlib.pyplot as plt
 
 # Connect to SQLite database
-conn = sqlite3.connect('test_muse.db')
+conn = sqlite3.connect('muse_jobs.db')
 cursor = conn.cursor()
 
-# Create a table for job postings if it doesn't exist
-cursor.execute('''
-   CREATE TABLE IF NOT EXISTS job_postings (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       job_category TEXT,
-       job_listing TEXT,
-       publication_date TEXT,
-       experience_level TEXT
-   )
-''')
+# Fetch all job postings from the database
+cursor.execute("SELECT publication_date FROM job_postings")
+results = cursor.fetchall()
 
-# Commit changes to the database
-conn.commit()
+# Extract days from publication dates
+days = [datetime.strptime(date[0], '%B %d, %Y').strftime('%A') for date in results]
 
-full_data = []
-unique_job_listings = set()
-page_count = 0
+# Count occurrences of each day
+day_counts = Counter(days)
 
-while len(full_data) < 100 and page_count < 25:
-    page_count += 1
-    res = requests.get(f'https://www.themuse.com/api/public/jobs?page={page_count}')
-    data = res.json()
+# Order days of the week
+ordered_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-    lists = data['results']
-    for item in lists:
-        # Convert the publication date to a datetime object
-        publication_date = datetime.strptime(item['publication_date'], '%Y-%m-%dT%H:%M:%SZ')
+# Create a bar chart with enhanced formatting
+plt.figure(figsize=(10, 6))
+plt.bar(ordered_days, [day_counts[day] for day in ordered_days], color='skyblue', edgecolor='black', linewidth=1.2)
+plt.xlabel('Day of the Week', fontsize=14)
+plt.ylabel('Number of Job Listings', fontsize=14)
+plt.title('Job Listings Posted by Day of the Week', fontsize=16)
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+plt.tight_layout()
 
-        # Check if the publication date is after '2023-05-19T23:38:55Z'
-        if publication_date > datetime.strptime('2023-05-19T23:38:55Z', '%Y-%m-%dT%H:%M:%SZ'):
-            job_listing = item.get('name', 'N/A')
+# Display the bar chart
+plt.show()
 
-            # Check if the job listing is not already in the set
-            if job_listing not in unique_job_listings:
-                job_category = item.get('Job Category', 'N/A')
-                experience_level = item.get('Level', 'N/A')
-
-                # Store data in SQLite database
-                cursor.execute('''
-                    INSERT INTO job_postings (job_category, job_listing, publication_date, experience_level)
-                    VALUES (?, ?, ?, ?)
-                ''', (job_category, job_listing, publication_date.strftime('%Y-%m-%dT%H:%M:%SZ'), experience_level))
-
-                # Commit changes to the database after every 25 rows
-                if len(full_data) % 25 == 0:
-                    conn.commit()
-
-                # Append data to the full_data list (optional)
-                full_data.append({
-                    'job_category': job_category,
-                    'job_listing': job_listing,
-                    'publication_date': publication_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                    'experience_level': experience_level
-                })
-
-                # Add job listing to the set to track uniqueness
-                unique_job_listings.add(job_listing)
-
-# Commit any remaining changes
-conn.commit()
-
-# Print the collected data
-pprint(full_data)
+# Close the database connection
+conn.close()
