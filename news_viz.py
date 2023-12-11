@@ -26,9 +26,9 @@ def plot_total_sentiment_data(data):
 
     plt.figure(figsize=(10, 6))
 
-    # Creating a side-by-side bar chart
+    
     plt.bar(index - bar_width, neutral_counts, bar_width, color='#00008B', label='Neutral')
-    plt.bar(index, positive_counts, bar_width, color='#ADD8E6', label='Positive')
+    plt.bar(index, positive_counts, bar_width, color='blue', label='Positive')
     plt.bar(index + bar_width, negative_counts, bar_width, color='#B0E0E6', label='Negative')
 
     plt.xlabel('Date')
@@ -41,11 +41,11 @@ def plot_total_sentiment_data(data):
     plt.show()
 
 def main():
-    db_path = 'unified_database.db'  # Adjust this path to your unified database file
+    db_path = 'unified_database.db'  
     total_data = fetch_total_sentiment_data(db_path)
 
-    # Plotting total sentiment data
+    
     plot_total_sentiment_data(total_data)
 
 
-    main()
+main()
