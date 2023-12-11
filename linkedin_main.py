@@ -11,37 +11,39 @@ def get_or_insert(cursor, table, column, value):
     cursor.execute(f"INSERT INTO {table} ({column}) VALUES (?)", (value,))
     return cursor.lastrowid
 
-def linkedin_scraper(webpage, page_number, conn, cursor, max_pages, rows_to_fetch=25):
-    if page_number > max_pages:
-        return
+def linkedin_scraper(webpage, conn, cursor, jobs_to_fetch=25):
+    page_number = 0
+    rows_to_fetch = 25
+    max_pages = (jobs_to_fetch + rows_to_fetch - 1) // rows_to_fetch
 
-    next_page = webpage + str(page_number * rows_to_fetch)
-    print(f"Scraping: {next_page}")
+    while page_number < max_pages:
+        next_page = webpage + str(page_number * rows_to_fetch)
+        print(f"Scraping: {next_page}")
 
-    try:
-        response = requests.get(next_page)
-        soup = BeautifulSoup(response.content, 'html.parser')
+        try:
+            response = requests.get(next_page)
+            soup = BeautifulSoup(response.content, 'html.parser')
 
-        jobs = soup.find_all('div', class_='base-card relative w-full hover:no-underline focus:no-underline base-card--link base-search-card base-search-card--link job-search-card')
-        for job in jobs:
-            title = job.find('h3', class_='base-search-card__title').text.strip()
-            company = job.find('h4', class_='base-search-card__subtitle').text.strip()
-            location = job.find('span', class_='job-search-card__location').text.strip()
-            link = job.find('a', class_='base-card__full-link')['href']
+            jobs = soup.find_all('div', class_='base-card relative w-full hover:no-underline focus:no-underline base-card--link base-search-card base-search-card--link job-search-card')
+            for job in jobs:
+                title = job.find('h3', class_='base-search-card__title').text.strip()
+                company = job.find('h4', class_='base-search-card__subtitle').text.strip()
+                location = job.find('span', class_='job-search-card__location').text.strip()
+                link = job.find('a', class_='base-card__full-link')['href']
 
-            title_id = get_or_insert(cursor, 'titles', 'name', title)
-            company_id = get_or_insert(cursor, 'companies', 'name', company)
-            location_id = get_or_insert(cursor, 'locations', 'name', location)
+                title_id = get_or_insert(cursor, 'titles', 'name', title)
+                company_id = get_or_insert(cursor, 'companies', 'name', company)
+                location_id = get_or_insert(cursor, 'locations', 'name', location)
 
-            cursor.execute('''
-                INSERT INTO jobs (title_id, company_id, location_id, apply_link)
-                VALUES (?, ?, ?, ?)
-            ''', (title_id, company_id, location_id, link))
+                cursor.execute('''
+                    INSERT INTO jobs (title_id, company_id, location_id, apply_link)
+                    VALUES (?, ?, ?, ?)
+                ''', (title_id, company_id, location_id, link))
 
-        conn.commit()  # Commit after processing each page
-        linkedin_scraper(webpage, page_number + 1, conn, cursor, max_pages, rows_to_fetch)
-    except Exception as e:
-        print(f"Error occurred: {e}")
+            conn.commit()
+            page_number += 1
+        except Exception as e:
+            print(f"Error occurred: {e}")
 
 def main():
     conn = sqlite3.connect('linkedin-jobs.db')
@@ -53,7 +55,6 @@ def main():
         name TEXT UNIQUE
     )
 ''')
-
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS companies (
@@ -82,10 +83,10 @@ def main():
 
     conn.commit()
 
-    max_pages = 5
-    linkedin_scraper('https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Technology&location=United%20States&geoId=103644278&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0&start=', 0, conn, cursor, max_pages)
+    jobs_to_fetch = 25 
+    linkedin_scraper('https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Technology&location=United%20States&geoId=103644278&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0&start=', conn, cursor, jobs_to_fetch)
 
     conn.close()
 
-
-main()
+if __name__ == "__main__":
+    main()

@@ -70,16 +70,12 @@ def main():
     conn = sqlite3.connect('linkedin-jobs.db')
     cursor = conn.cursor()
 
-    # Calculate top job titles
     top_job_titles = calculate_top_job_titles(cursor)
 
-    # Calculate top locations
     top_locations = calculate_top_locations(cursor)
 
-    # Visualize top job titles
     plot_top_job_titles(top_job_titles)
 
-    # Visualize top locations
     plot_top_locations(top_locations)
 
     conn.close()
