@@ -22,7 +22,7 @@ def insert_data_into_unified_db(db_path, data, insert_query):
     conn.commit()
     conn.close()
 
-# Create tables for LinkedIn data
+# LinkedIn data
 create_table_in_unified_db('unified_database.db', '''
     CREATE TABLE IF NOT EXISTS linkedin_titles (
         id INTEGER PRIMARY KEY,
@@ -54,7 +54,7 @@ create_table_in_unified_db('unified_database.db', '''
     )
 ''')
 
-# Create tables for Muse data
+#for Muse data
 create_table_in_unified_db('unified_database.db', '''
     CREATE TABLE IF NOT EXISTS muse_job_postings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,7 +65,7 @@ create_table_in_unified_db('unified_database.db', '''
     )
 ''')
 
-# Create tables for News API data
+# tables for News API data
 create_table_in_unified_db('unified_database.db', '''
     CREATE TABLE IF NOT EXISTS news_posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -85,7 +85,7 @@ create_table_in_unified_db('unified_database.db', '''
     )
 ''')
 
-# Insert data into LinkedIn tables
+# Insert data LinkedIn tables
 titles_data = fetch_data_from_db('linkedin-jobs.db', 'SELECT id, name FROM titles')
 companies_data = fetch_data_from_db('linkedin-jobs.db', 'SELECT id, name FROM companies')
 locations_data = fetch_data_from_db('linkedin-jobs.db', 'SELECT id, name FROM locations')
@@ -96,13 +96,13 @@ insert_data_into_unified_db('unified_database.db', companies_data, 'INSERT INTO 
 insert_data_into_unified_db('unified_database.db', locations_data, 'INSERT INTO linkedin_locations (id, name) VALUES (?, ?)')
 insert_data_into_unified_db('unified_database.db', jobs_data, 'INSERT INTO linkedin_jobs (title_id, company_id, location_id, apply_link) VALUES (?, ?, ?, ?)')
 
-# Insert data into Muse table
+# InserMuse table
 muse_data = fetch_data_from_db('muse_jobs.db', 'SELECT job_category, job_listing, publication_date, experience_level FROM job_postings')
 insert_data_into_unified_db('unified_database.db', muse_data, '''
     INSERT INTO muse_job_postings (job_category, job_listing, publication_date, experience_level) VALUES (?, ?, ?, ?)
 ''')
 
-# Insert data into News API tables
+# News AP
 news_posts_data = fetch_data_from_db('news_database.db', 'SELECT source_id, content, timestamp, neutral_count, positive_count, negative_count FROM posts')
 news_sources_data = fetch_data_from_db('news_database.db', 'SELECT source_id, name FROM sources')
 

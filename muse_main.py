@@ -4,11 +4,11 @@ import sqlite3
 import requests
 from datetime import datetime
 
-# Connect to SQLite database
+
 conn = sqlite3.connect('muse_jobs.db')
 cursor = conn.cursor()
 
-# Create a table for job postings if it doesn't exist
+
 cursor.execute('''
    CREATE TABLE IF NOT EXISTS job_postings (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,7 +19,7 @@ cursor.execute('''
    )
 ''')
 
-# Create a table to track the last processed page
+
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS last_processed_page (
         id INTEGER PRIMARY KEY,
@@ -27,23 +27,23 @@ cursor.execute('''
     )
 ''')
 
-# Function to get the last processed page
+
 def get_last_processed_page(cursor):
     cursor.execute("SELECT page_number FROM last_processed_page WHERE id = 1")
     result = cursor.fetchone()
     return result[0] if result else 0
 
-# Function to update the last processed page
+
 def update_last_processed_page(cursor, page_number):
     cursor.execute("INSERT OR REPLACE INTO last_processed_page (id, page_number) VALUES (1, ?)", (page_number,))
 
-# Initialize a set to track unique job listings
+
 unique_job_listings = set()
 
-# Fetch the last processed page
+
 last_processed_page = get_last_processed_page(cursor)
-max_pages = 10  # Max pages to scrape
-rows_to_fetch = 25  # Number of rows to insert per run
+max_pages = 10  
+rows_to_fetch = 25  
 page_count = last_processed_page + 1  # Start from the next page
 
 
@@ -107,7 +107,7 @@ while page_count <= max_pages and len(unique_job_listings) < rows_to_fetch:
     page_count += 1
 
 
-# Update the last processed page
+
 update_last_processed_page(cursor, page_count)
 conn.commit()
 conn.close()
