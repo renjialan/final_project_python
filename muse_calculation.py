@@ -21,8 +21,8 @@ most_common_month = Counter(months).most_common(1)[0][0]
 most_common_day = Counter(days).most_common(1)[0][0]
 
 # Print the results
-print(f"The most common month for job postings is: {most_common_month}")
-print(f"The most common day of the week for job postings is: {most_common_day}")
+print(f"The most common month for a job listing to be posted on Muse is: {most_common_month}")
+print(f"The most common day of the week for a job listing to be posted on Muse is: {most_common_day}")
 
 # Close the database connection
 conn.close()
