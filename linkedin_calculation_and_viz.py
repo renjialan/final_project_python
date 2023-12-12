@@ -13,6 +13,7 @@ def calculate_top_job_titles(cursor, limit=5):
     ''', (limit,))
     top_job_titles = cursor.fetchall()
 
+    print ("The top titles for technology related jobs in the U.S. posted on LinkedIn are as follows:"+str(top_job_titles))
     return top_job_titles
 
 def calculate_top_locations(cursor, limit=5):
@@ -27,6 +28,7 @@ def calculate_top_locations(cursor, limit=5):
     ''', (limit,))
     top_locations = cursor.fetchall()
 
+    print ("The top locations for technology related jobs in the U.S. posted on LinkedIn are as follows:" +str(top_locations))
     return top_locations
 
 def plot_top_job_titles(data):
@@ -35,9 +37,9 @@ def plot_top_job_titles(data):
 
     titles, counts = zip(*data)
     plt.bar(titles, counts, color=sns.color_palette("viridis", len(titles)))
-    plt.xlabel('Job Titles', fontsize=12)
-    plt.ylabel('Number of Jobs', fontsize=12)
-    plt.title('Top 5 Job Titles by Count', fontsize=16)
+    plt.xlabel('Job Titles', fontsize=16)
+    plt.ylabel('Number of Jobs', fontsize=16)
+    plt.title('LinkedIn Top 5 Job Titles by Count', fontsize=18)
     plt.xticks(rotation=45, ha='right', fontsize=12)
     plt.ylim(bottom=0)
     plt.tight_layout()
@@ -54,9 +56,9 @@ def plot_top_locations(data):
 
     locations, counts = zip(*data)
     plt.bar(locations, counts, color=sns.color_palette("viridis", len(locations)))
-    plt.xlabel('Locations', fontsize=12)
-    plt.ylabel('Number of Jobs', fontsize=12)
-    plt.title('Top 5 Job Locations by Count', fontsize=16)
+    plt.xlabel('Locations', fontsize=16)
+    plt.ylabel('Number of Jobs', fontsize=16)
+    plt.title('LinkedIn Top 5 Job Locations by Count', fontsize=18)
     plt.xticks(rotation=45, ha='right', fontsize=12)
     plt.ylim(bottom=0)
     plt.tight_layout()
